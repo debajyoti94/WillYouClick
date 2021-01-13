@@ -57,16 +57,31 @@ def run(fold, dataset):
     dl_obj.dump_file(lr_model, str(config.MODEL_NAME)+str(fold)+'.pickle')
 
 
-def inference_stage():
+def inference_stage(model, dataset):
     '''
-    Get the predictions for test set here
+
+    :param model:
+    :param dataset: test set preferrably
     :return:
     '''
-    # load model
+
+    X_test = dataset.drop(config.OUTPUT_FEATURE, axis=1,
+                                                inplace=False).values
+    y_test = dataset[config.OUTPUT_FEATURE].values
 
     # get predictions
+    preds = model.predict(X_test)
 
     # get performance metrics
+    accuracy = accuracy_score(y_test, preds)
+
+    p, r, f1, support = precision_recall_fscore_support(y_test, preds)
+
+    print(
+        "---Test set performance---\nAccuracy={}\nPrecision={}\nRecall={}\nF1={}".format(
+             accuracy, p, r, f1
+        )
+    )
 
     return
 
@@ -85,7 +100,7 @@ if __name__  == "__main__":
 
     parser.add_argument('--test', type=str,
                         help='Provide argument \"--test inference\" to get model performance'
-                             ' on the test set')
+                             ' on the test set.')
 
     args = parser.parse_args()
     dl_obj = DumpLoadFile()     # this is for pickling objects
@@ -143,8 +158,13 @@ if __name__  == "__main__":
 
         # first check if the test set exists
         if os.path.isfile(config.TEST_FILENAME):
+            # load the test set
+            test_set = dl_obj.load_pickled_file(config.TEST_FILENAME)
+
+            # load the model
+            model = dl_obj.load_pickled_file(config.BEST_MODEL)
             # call the inference stage
-            pass
+            inference_stage(model, test_set)
 
         else:
             print("Test set does not exist. Please obtain the test set first.\n"
