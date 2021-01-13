@@ -9,7 +9,7 @@ TRAIN_FILENAME  = '../input/train_set.pickle'
 TEST_FILENAME = '../input/test_set.pickle'
 
 # for plots
-NULL_CHECK_HEATMAP = 'null_check_heatmap.png'
+NULL_CHECK_HEATMAP = '../plots/null_check_heatmap.png'
 
 # for cross validation
 NUM_FOLDS = 5
