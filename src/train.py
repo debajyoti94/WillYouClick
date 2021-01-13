@@ -6,21 +6,55 @@ This code will code contain things associated to adding commandline arguments.
 
 import argparse
 import config
-import create_folds
-from feature_engg import FeaturEngineering
+from create_fold import SKFold
+from feature_engg import FeatureEngineering, \
+                            DumpLoadFile
 import pandas as pd
 import os
+from sklearn import linear_model
+from sklearn.metrics import accuracy_score,\
+                        precision_recall_fscore_support
 
-def run():
+def run(fold, dataset):
     '''
     We will train the model here
+    :param fold:
+    :param dataset:
     :return:
     '''
 
+    # split the train set into X_train and y_train
+    dataset_train = dataset[dataset.kfold != fold].reset_index(drop=True)
+    dataset_valid = dataset[dataset.kfold == fold].reset_index(drop=True)
+
+    X_train = dataset_train.drop([config.OUTPUT_FEATURE, 'kfold'], axis=1,
+                           inplace=False).values
+    y_train = dataset_train[config.OUTPUT_FEATURE].values
+
+    X_valid = dataset_valid.drop([config.OUTPUT_FEATURE, 'kfold'], axis=1,
+                                 inplace=False).values
+    y_valid = dataset_valid[config.OUTPUT_FEATURE].values
+
+    lr_model = linear_model.LogisticRegression(penalty='l2',
+                                               class_weight='balanced')
+
     # train model
+    lr_model.fit(X_train, y_train)
 
     # get metrics
-    return
+    preds = lr_model.predict(X_valid)
+
+    accuracy = accuracy_score(y_valid, preds)
+    p, r, f1, support = precision_recall_fscore_support(y_valid, preds)
+
+    print(
+        "---Fold={}---\nAccuracy={}\nPrecision={}\nRecall={}\nF1={}".format(
+            fold, accuracy, p, r, f1
+        )
+    )
+
+    dl_obj = DumpLoadFile()
+    dl_obj.dump_file(lr_model, str(config.MODEL_NAME)+str(fold)+'.pickle')
 
 
 def inference_stage():
@@ -54,6 +88,8 @@ if __name__  == "__main__":
                              ' on the test set')
 
     args = parser.parse_args()
+    dl_obj = DumpLoadFile()     # this is for pickling objects
+
     # based on commandline arguments
     # call train / inference stage functions
     if args.clean == 'dataset':
@@ -85,7 +121,17 @@ if __name__  == "__main__":
         # first check if the train set exists
         # if it doesn't then we need to get the training dataset first
         if os.path.isfile(config.TRAIN_FILENAME):
+            # load the train set
+            train_set = dl_obj.load_pickled_file(config.TRAIN_FILENAME)
+
+            # get the skfold
+            train_set['kfold'] = -1
+            skfold_obj = SKFold()
+            train_set = skfold_obj.create_folds(train_set)
+
             #train the model
+            for fold in range(config.NUM_FOLDS):
+                run(fold,train_set)
 
         else:
             print("Training set does not exist. Please obtain the train set first.\n"
@@ -96,6 +142,7 @@ if __name__  == "__main__":
         # first check if the test set exists
         if os.path.isfile(config.TEST_FILENAME):
             # call the inference stage
+            pass
 
         else:
             print("Test set does not exist. Please obtain the test set first.\n"
