@@ -16,6 +16,7 @@ NUM_FOLDS = 5
 
 # model name
 MODEL_NAME = '../models/LR_Ad_click_Baseline_'
+BEST_MODEL = '../models/LR_Ad_click_Baseline_1.pickle'
 
 FILE_DELIMITER = ','
 ENCODING_TYPE = 'ISO-8859-1'
