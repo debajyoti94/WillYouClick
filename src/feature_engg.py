@@ -14,7 +14,7 @@ import pandas as pd
 import abc
 import pickle
 import seaborn as sns
-from create_folds import SKFold
+from create_fold import SKFold
 import sklearn.preprocessing as preproc
 
 
@@ -121,16 +121,6 @@ class FeatureEngineering(MustHaveForFeatureEngineering):
         #     cleaned_input_data.drop("Sex", axis=1, inplace=True)
         #     self.plot_null_values(cleaned_input_data)
 
-
-    def load_pickled_file(self, filename):
-        """
-
-        :param filename: file that you want to load
-        :return: unpickled file
-        """
-        with open(filename, "rb") as pickle_handle:
-            return pickle.load(pickle_handle)
-
     def fill_fare(self, gender_fare_tuple):
         """
         Fare feature is missing, so we fill it up based
@@ -149,21 +139,6 @@ class FeatureEngineering(MustHaveForFeatureEngineering):
         else:
             return fare
 
-    def dump_file(self, data, filename, path):
-        """
-
-        :param data:  data that we want to dump/serialize
-        :param filename: filename that we want to associate to the data
-        :param path: where we want to store the data
-        :return: 0 if it works out well, -1 if in case something fails
-        """
-        try:
-            with open(str(path + filename), "wb") as pickle_handle:
-                pickle.dump(data, pickle_handle)
-            return 0
-
-        except Exception:
-            return -1
 
     def plot_null_values(self, data):
         """
@@ -174,6 +149,32 @@ class FeatureEngineering(MustHaveForFeatureEngineering):
 
         sns_heatmap_plot = sns.heatmap(data.isnull(),
                                        cmap="Blues", yticklabels=False)
-        sns_heatmap_plot.figure.savefig(null_check_heatmap_file)
+        sns_heatmap_plot.figure.savefig(config.NULL_CHECK_HEATMAP)
 
 
+
+class DumpLoadFile:
+
+    def load_pickled_file(self, filename):
+        """
+
+        :param filename: file that you want to load
+        :return: unpickled file
+        """
+        with open(filename, "rb") as pickle_handle:
+            return pickle.load(pickle_handle)
+
+    def dump_file(self, data, filename):
+        """
+
+        :param data:  data that we want to dump/serialize
+        :param filename: filename that we want to associate to the data
+        :return: 0 if it works out well, -1 if in case something fails
+        """
+        try:
+            with open(filename, "wb") as pickle_handle:
+                pickle.dump(data, pickle_handle)
+            return 0
+
+        except Exception:
+            return -1
