@@ -106,15 +106,17 @@ if __name__  == "__main__":
         clean_data = fr_obj.cleaning_data(original_dataset)
 
         # shuffle the cleaned data
-        shuffled_data = clean_data.sample(frac=1).reset_index(drop=True)
+        shuffled_data = clean_data.sample(frac=1,
+                                          random_state=0).reset_index(
+                                                                    drop=True)
 
         # split into train and test
         train_set = shuffled_data[:400]
         test_set = shuffled_data[400:]
 
         # dump the dataset
-        fr_obj.dump_file(train_set, config.TRAIN_FILENAME)
-        fr_obj.dump_file(test_set, config.TEST_FILENAME)
+        dl_obj.dump_file(train_set, config.TRAIN_FILENAME)
+        dl_obj.dump_file(test_set, config.TEST_FILENAME)
 
     elif args.train == 'skfold':
 
