@@ -1,12 +1,6 @@
-'''
+"""
 Here we will pre-process the data and make it ready for the model to consume
-'''
-
-import abc
-
-""" In this code we will apply the feature engineering techniques
-that were applied to train set in the notebook"""
-
+"""
 
 import config
 from sklearn.preprocessing import LabelEncoder
@@ -14,7 +8,6 @@ import pandas as pd
 import abc
 import pickle
 import seaborn as sns
-from create_fold import SKFold
 import sklearn.preprocessing as preproc
 
 
@@ -54,17 +47,17 @@ class FeatureEngineering(MustHaveForFeatureEngineering):
         return encoded_feature
 
     def feature_scaling(self, input_data, features_to_scale):
-        '''
+        """
         Applying minmax scaling here.
         :param features_to_scale:
         :return:
-        '''
+        """
         for feature in features_to_scale:
-            input_data[str(feature)+'_scaled'] = preproc.minmax_scale(input_data[[feature]])
+            input_data[str(feature) + "_scaled"] = preproc.minmax_scale(
+                input_data[[feature]]
+            )
 
         return input_data
-
-
 
     def cleaning_data(self, input_data):
         """
@@ -76,50 +69,31 @@ class FeatureEngineering(MustHaveForFeatureEngineering):
 
         # drop the features that we do no want to keep
         # while training the model
-        cleaned_input_data = input_data.drop(config.FEATURES_TO_DROP,
-                                            axis=1, inplace=False)
-
+        cleaned_input_data = input_data.drop(
+            config.FEATURES_TO_DROP, axis=1, inplace=False
+        )
 
         # label encoding feature: Country
-        country_labels = self.label_encoding(cleaned_input_data,
-                                             config.CATEGORICAL_VARIABLES)
+        country_labels = self.label_encoding(
+            cleaned_input_data, config.CATEGORICAL_VARIABLES
+        )
         cleaned_input_data["Country_encoded"] = country_labels
         cleaned_input_data.drop("Country", axis=1, inplace=True)
 
         # apply feature scaling to salary and time spent on site
-        cleaned_input_data = self.feature_scaling(cleaned_input_data, ['Salary',
-                                                                       'Time Spent on Site'])
+        cleaned_input_data = self.feature_scaling(
+            cleaned_input_data, ["Salary", "Time Spent on Site"]
+        )
 
         # drop the original features
-        cleaned_input_data.drop(['Salary', 'Time Spent on Site'],
-                                axis=1, inplace=True)
+        cleaned_input_data.drop(["Salary", "Time Spent on Site"],
+                                            axis=1, inplace=True)
 
         # create the heatmap plot of null values as a check
         self.plot_null_values(cleaned_input_data)
 
         return cleaned_input_data
 
-        # # create a k-fold column which will be used for cross validation
-        # cleaned_input_data["kfold"] = -1
-        #
-        #     # create stratified kfold cross validation
-        #     skfold_obj = SKFold()
-        #     cleaned_input_data = skfold_obj.create_folds(cleaned_input_data)
-
-        # elif dataset_type == "TEST":
-        #
-        #     # fare column has some missing values
-        #     # so we will fill it up based on the mean value
-        #     cleaned_input_data["Fare"] = cleaned_input_data[["Sex",
-        #                                                      "Fare"]].apply(
-        #                                                             self.fill_fare,
-        #                                                             axis=1
-        #                                                         )
-        #
-        #     sex_labels = self.label_encoding(cleaned_input_data, "Sex")
-        #     cleaned_input_data["Sex_encoded"] = sex_labels
-        #     cleaned_input_data.drop("Sex", axis=1, inplace=True)
-        #     self.plot_null_values(cleaned_input_data)
 
     def fill_fare(self, gender_fare_tuple):
         """
@@ -139,7 +113,6 @@ class FeatureEngineering(MustHaveForFeatureEngineering):
         else:
             return fare
 
-
     def plot_null_values(self, data):
         """
         Here we will make a heatmap plot to see if there are any null values
@@ -147,14 +120,11 @@ class FeatureEngineering(MustHaveForFeatureEngineering):
         :return: a heatmap, stored on disk
         """
 
-        sns_heatmap_plot = sns.heatmap(data.isnull(),
-                                       cmap="Blues", yticklabels=False)
+        sns_heatmap_plot = sns.heatmap(data.isnull(), cmap="Blues", yticklabels=False)
         sns_heatmap_plot.figure.savefig(config.NULL_CHECK_HEATMAP)
 
 
-
 class DumpLoadFile:
-
     def load_pickled_file(self, filename):
         """
 
@@ -171,10 +141,7 @@ class DumpLoadFile:
         :param filename: filename that we want to associate to the data
         :return: 0 if it works out well, -1 if in case something fails
         """
-        try:
-            with open(filename, "wb") as pickle_handle:
-                pickle.dump(data, pickle_handle)
-            return 0
 
-        except Exception:
-            return -1
+        with open(filename, "wb") as pickle_handle:
+            pickle.dump(data, pickle_handle)
+
