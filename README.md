@@ -13,14 +13,14 @@ The repository has multiple directories, with each serving a different purpose:
     - test_functionalities: using pytest module, i define some data sanity checks on the training data.
     - train.py: this file contains the code for implementing the model. The train and the inference stage.
 
-## To obtain clean data and split it into train and test set, use the following command:
+### To obtain clean data and split it into train and test set, use the following command:
   ```python train.py --clean dataset```
   
-## To train the model use the following command:
+### To train the model use the following command:
   ```python train.py --train skfold```
   
-## For inference stage, use:
+### For inference stage, use:
   ```python train.py --test inference```
 
-## For more information use:
+### For more information use:
   ```python train.py --help```
